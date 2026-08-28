@@ -1,0 +1,145 @@
+:root {
+  --columns: 48;
+  --paper: #fdfdf7;
+  --ink: #1a1a1a;
+  color-scheme: light dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #2b2d31;
+  color: #eee;
+  min-height: 100vh;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  background: #1e1f22;
+  position: sticky;
+  top: 0;
+}
+
+.toolbar h1 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.status {
+  font-size: 0.85rem;
+  color: #8f8;
+}
+
+.status.disconnected {
+  color: #f88;
+}
+
+.config {
+  font-size: 0.8rem;
+  color: #aaa;
+  margin-left: auto;
+}
+
+#clear-btn {
+  background: #444;
+  color: #eee;
+  border: 1px solid #666;
+  border-radius: 4px;
+  padding: 0.35rem 0.75rem;
+  cursor: pointer;
+}
+
+#clear-btn:hover {
+  background: #555;
+}
+
+main {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.receipt-roll {
+  width: calc(var(--columns) * 1ch);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 14px;
+  line-height: 1.35;
+  box-shadow: 0 0 24px rgba(0, 0, 0, 0.4);
+  padding: 1rem 0.75rem;
+}
+
+.segment {
+  min-height: 1.5em;
+}
+
+.segment + .segment {
+  margin-top: 0.5rem;
+}
+
+.tear-line {
+  border: none;
+  border-top: 2px dashed #999;
+  margin: 0.5rem 0;
+}
+
+.job-marker {
+  font-size: 0.7em;
+  color: #888;
+  border-top: 1px dotted #ccc;
+  margin: 0.35rem 0;
+  padding-top: 0.15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.receipt-line {
+  white-space: pre-wrap;
+  word-break: break-all;
+  min-height: 1em;
+}
+
+.receipt-line.align-center {
+  text-align: center;
+}
+
+.receipt-line.align-right {
+  text-align: right;
+}
+
+.receipt-line.align-left {
+  text-align: left;
+}
+
+.span-bold {
+  font-weight: 700;
+}
+
+.span-underline {
+  text-decoration: underline;
+}
+
+.receipt-image {
+  display: block;
+  margin: 0.25rem 0;
+  image-rendering: pixelated;
+}
+
+.receipt-image.align-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.receipt-image.align-right {
+  margin-left: auto;
+  margin-right: 0;
+}
