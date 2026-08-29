@@ -52,8 +52,14 @@ function renderSpan(span) {
   if (span.heightMultiplier > 1) {
     styles.push(`font-size:${span.heightMultiplier}em`, `line-height:${span.heightMultiplier}em`);
   }
-  if (span.widthMultiplier > 1) {
-    styles.push(`display:inline-block`, `transform:scaleX(${span.widthMultiplier})`, `transform-origin:left`);
+  // font-size scales glyph width along with height (monospace), so the extra
+  // scaleX needed to reach widthMultiplier is relative to what font-size
+  // already contributed — applying widthMultiplier directly here would
+  // compound with that and overshoot (e.g. GS ! 0x11's "double width and
+  // height" rendered 4x wide instead of 2x).
+  const relativeWidthScale = span.widthMultiplier / span.heightMultiplier;
+  if (relativeWidthScale !== 1) {
+    styles.push(`display:inline-block`, `transform:scaleX(${relativeWidthScale})`, `transform-origin:left`);
   }
   if (styles.length) node.setAttribute('style', styles.join(';'));
 

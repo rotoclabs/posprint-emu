@@ -64,9 +64,20 @@ main {
   display: flex;
   justify-content: center;
   padding: 2rem 1rem;
+  overflow-x: auto;
 }
 
 .receipt-roll {
+  /* content-box so the horizontal padding below doesn't eat into the
+     column width — lines padded out to exactly `columns` characters
+     (dividers, right-aligned totals) need the full 1ch-per-column budget
+     as pure content, or they overflow and wrap. */
+  box-sizing: content-box;
+  /* Flex items default to shrinkable with min-width:auto; combined with
+     .receipt-line's word-break:break-all (whose min-content width is
+     tiny), a too-narrow viewport would otherwise squeeze this below its
+     48ch width and wrap text a few characters early instead of scrolling. */
+  flex-shrink: 0;
   width: calc(var(--columns) * 1ch);
   background: var(--paper);
   color: var(--ink);
