@@ -2,18 +2,21 @@ import { parseArgs } from 'node:util';
 import { readFileSync, existsSync } from 'node:fs';
 
 export interface AppConfig {
+  host: string;
   tcpPort: number;
   httpPort: number;
   columns: number;
 }
 
 const DEFAULTS: AppConfig = {
+  host: 'localhost',
   tcpPort: 9100,
   httpPort: 8080,
   columns: 48,
 };
 
 interface ConfigFile {
+  host?: string;
   tcpPort?: number;
   httpPort?: number;
   columns?: number;
@@ -31,6 +34,7 @@ export function loadConfig(argv: string[] = process.argv.slice(2)): AppConfig {
   const { values } = parseArgs({
     args: argv,
     options: {
+      host: { type: 'string' },
       'tcp-port': { type: 'string' },
       'http-port': { type: 'string' },
       columns: { type: 'string' },
@@ -40,6 +44,12 @@ export function loadConfig(argv: string[] = process.argv.slice(2)): AppConfig {
   });
 
   const fileConfig: ConfigFile = values.config ? readConfigFile(String(values.config)) : {};
+
+  const host = values.host
+    ? String(values.host)
+    : process.env.HOST
+      ? process.env.HOST
+      : (fileConfig.host ?? DEFAULTS.host);
 
   const tcpPort = values['tcp-port']
     ? Number(values['tcp-port'])
@@ -59,5 +69,5 @@ export function loadConfig(argv: string[] = process.argv.slice(2)): AppConfig {
       ? Number(process.env.RECEIPT_COLUMNS)
       : (fileConfig.columns ?? DEFAULTS.columns);
 
-  return { tcpPort, httpPort, columns };
+  return { host, tcpPort, httpPort, columns };
 }

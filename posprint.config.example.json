@@ -1,4 +1,5 @@
 {
+  "host": "localhost",
   "tcpPort": 9100,
   "httpPort": 8080,
   "columns": 48

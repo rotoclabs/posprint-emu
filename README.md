@@ -36,9 +36,13 @@ Resolved in order: CLI flags > environment variables > config file > defaults.
 
 | Setting | CLI flag | Env var | Default |
 |---|---|---|---|
+| Listen host | `--host` | `HOST` | `localhost` |
 | Printer TCP port | `--tcp-port` | `TCP_PORT` | `9100` |
 | Viewer HTTP port | `--http-port` | `HTTP_PORT` | `8080` |
 | Receipt width (characters) | `--columns` | `RECEIPT_COLUMNS` | `48` (42 is common for 58mm paper) |
+
+Use `--host 0.0.0.0` (or any specific interface IP) to listen on more than just
+`localhost`.
 
 A JSON config file can also be passed with `--config path/to/file.json` — see
 `posprint.config.example.json`.

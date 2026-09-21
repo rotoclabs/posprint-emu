@@ -11,10 +11,10 @@ const httpServer = createHttpServer(config, receipt, () => broadcaster.broadcast
 const broadcaster = new ReceiptBroadcaster(httpServer, receipt);
 const tcpServer = createTcpServer(receipt, broadcaster);
 
-httpServer.listen(config.httpPort, () => {
-  console.log(`[posprint-emu] viewer UI:    http://localhost:${config.httpPort}`);
+httpServer.listen(config.httpPort, config.host, () => {
+  console.log(`[posprint-emu] viewer UI:    http://${config.host}:${config.httpPort}`);
 });
 
-tcpServer.listen(config.tcpPort, () => {
-  console.log(`[posprint-emu] printer port: tcp://localhost:${config.tcpPort} (${config.columns} columns)`);
+tcpServer.listen(config.tcpPort, config.host, () => {
+  console.log(`[posprint-emu] printer port: tcp://${config.host}:${config.tcpPort} (${config.columns} columns)`);
 });
