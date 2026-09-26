@@ -25,8 +25,8 @@ npm run test:send
 ```
 
 It sends one crafted print job exercising every supported command (bold, underline, sizes,
-alignment, hard-wrap, a raster image, and both cut types) so you can confirm the viewer end to
-end.
+alignment, hard-wrap, a raster image, a QR code, and both cut types) so you can confirm the
+viewer end to end.
 
 Run `npm run build && npm start` to run from compiled output instead of `tsx`.
 
@@ -81,18 +81,24 @@ bytes, header length, and a decoder) — the tokenizer itself needs no changes.
 | Feed n dots (approximate) | `ESC J n` |
 | Cut (full/partial) | `GS V m` |
 | Raster bit image (normal mode) | `GS v 0 m xL xH yL yH [data]` |
+| QR code: select model / module size / error-correction level / store data / print | `GS ( k pL pH cn fn ...` (cn=49) |
 | Plain text (CP437) | anything else |
 
 Known simplifications: a single fixed CP437 codepage (no `ESC t` codepage switching yet),
 carriage return is a no-op, underline weight is collapsed to on/off, `ESC J` is rendered as a
 proportional spacer rather than converted to text lines, and only raster image mode 0 is
-rendered. Unrecognized or unsupported control sequences are logged to the console and skipped
-as no-ops — malformed input never crashes the emulator.
+rendered. For QR codes, the "select model" sub-command is tracked but has no rendering effect —
+the underlying QR library always emits Model-2-shaped symbols — and the quiet zone is a fixed
+4-module margin (the QR spec's own recommended minimum) rather than printer-configurable, since
+Epson's command set has no separate control for it; other `GS ( k` symbol types (PDF417,
+MaxiCode, etc., selected via a `cn` other than 49) aren't implemented. Unrecognized or
+unsupported control sequences are logged to the console and skipped as no-ops — malformed input
+never crashes the emulator.
 
 **Deferred / not yet implemented** (the architecture is designed to make these low-friction to
-add later): 1D barcodes (`GS k`), QR codes (`GS ( k`), multiple/switchable codepages (`ESC t`),
-cash drawer kick (`ESC p`), printer status queries (`DLE EOT`), NV image storage, and emulating
-multiple independent printers at once.
+add later): 1D barcodes (`GS k`), multiple/switchable codepages (`ESC t`), cash drawer kick
+(`ESC p`), printer status queries (`DLE EOT`), NV image storage, and emulating multiple
+independent printers at once.
 
 ## Testing
 

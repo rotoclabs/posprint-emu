@@ -4,6 +4,7 @@ import { boldSpec, underlineSpec, alignSpec, sizeSpec } from './commands/formatt
 import { lineFeedSpec, carriageReturnSpec, feedLinesSpec, feedDotsSpec } from './commands/feed.js';
 import { cutSpec } from './commands/cut.js';
 import { rasterImageSpec } from './commands/image.js';
+import { qr2dSpec } from './commands/qrCode.js';
 
 export type { CommandSpec };
 
@@ -13,6 +14,7 @@ export type { CommandSpec };
  */
 export const COMMAND_TABLE: CommandSpec[] = [
   rasterImageSpec,
+  qr2dSpec,
   initSpec,
   boldSpec,
   underlineSpec,

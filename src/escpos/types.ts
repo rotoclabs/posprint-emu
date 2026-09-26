@@ -57,6 +57,32 @@ export interface RasterImageCommand {
   data: Buffer;
 }
 
+export type QrErrorCorrectionLevel = 'L' | 'M' | 'Q' | 'H';
+
+export interface QrSelectModelCommand {
+  type: 'qrSelectModel';
+  model: number;
+}
+
+export interface QrModuleSizeCommand {
+  type: 'qrModuleSize';
+  size: number;
+}
+
+export interface QrErrorCorrectionCommand {
+  type: 'qrErrorCorrection';
+  level: QrErrorCorrectionLevel;
+}
+
+export interface QrStoreDataCommand {
+  type: 'qrStoreData';
+  data: Buffer;
+}
+
+export interface QrPrintCommand {
+  type: 'qrPrint';
+}
+
 /** Emitted for a recognized-but-unsupported control sequence, so it can be logged and skipped. */
 export interface UnsupportedCommand {
   type: 'unsupported';
@@ -92,4 +118,9 @@ export type ParsedCommand =
   | FeedDotsCommand
   | CutCommand
   | RasterImageCommand
+  | QrSelectModelCommand
+  | QrModuleSizeCommand
+  | QrErrorCorrectionCommand
+  | QrStoreDataCommand
+  | QrPrintCommand
   | UnsupportedCommand;

@@ -55,6 +55,18 @@ export class PrintJob {
         this.state.widthMultiplier = cmd.widthMultiplier;
         this.state.heightMultiplier = cmd.heightMultiplier;
         break;
+      case 'qrSelectModel':
+        this.state.qrModel = cmd.model;
+        break;
+      case 'qrModuleSize':
+        this.state.qrModuleSize = cmd.size;
+        break;
+      case 'qrErrorCorrection':
+        this.state.qrErrorCorrection = cmd.level;
+        break;
+      case 'qrStoreData':
+        this.state.qrPendingData = cmd.data;
+        break;
       case 'unsupported':
         this.onUnsupported(cmd.name, this);
         break;
@@ -62,5 +74,7 @@ export class PrintJob {
         break;
     }
     this.receipt.applyCommand(cmd, this.state);
+    // Cleared only after ReceiptModel has read it above, so PrintJob stays the sole owner of PrinterState mutation.
+    if (cmd.type === 'qrPrint') this.state.qrPendingData = null;
   }
 }

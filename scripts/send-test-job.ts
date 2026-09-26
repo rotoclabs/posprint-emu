@@ -32,6 +32,23 @@ function rasterImage(widthBytes: number, heightDots: number, data: Buffer): Buff
   ]);
 }
 
+/** GS ( k pL pH cn fn [params]: one "2D symbol" sub-command. `params` excludes cn/fn. */
+function qr2d(fn: number, params: number[] | Buffer): Buffer {
+  const cn = 0x31; // QR Code
+  const rest = Buffer.concat([bytes(cn, fn), Buffer.from(params)]);
+  return Buffer.concat([bytes(GS, 0x28, 0x6b, rest.length & 0xff, (rest.length >> 8) & 0xff), rest]);
+}
+
+function qrCode(data: string, moduleSize: number, errorCorrectionLevel: 0x30 | 0x31 | 0x32 | 0x33): Buffer {
+  return Buffer.concat([
+    qr2d(0x41, [50, 0]), // select model 2
+    qr2d(0x43, [moduleSize]), // set module size
+    qr2d(0x45, [errorCorrectionLevel]), // set error correction level
+    qr2d(0x50, Buffer.concat([bytes(0x30), Buffer.from(data)])), // store data (m=0x30 fixed)
+    qr2d(0x51, [0x30]), // print stored symbol (m=0x30 fixed)
+  ]);
+}
+
 const config = loadConfig();
 const img = checkerboardImage(8, 24);
 
@@ -65,6 +82,13 @@ const job = Buffer.concat([
   bytes(ESC, 0x64, 2), // feed 2 lines
   rasterImage(8, 24, img),
   bytes(0x0a),
+
+  bytes(ESC, 0x61, 1), // align center
+  bytes('Scan me:'),
+  bytes(0x0a),
+  qrCode('https://posprint-emu.example/order/12345', 4, 0x31), // module size 4, EC level M
+  bytes(0x0a),
+  bytes(ESC, 0x61, 0), // align left
 
   bytes(GS, 0x56, 0x00), // full cut
 

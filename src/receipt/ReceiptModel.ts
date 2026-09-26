@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { ParsedCommand } from '../escpos/types.js';
 import { decodeText } from '../escpos/codepage.js';
 import { rasterToPngDataUrl } from './rasterImage.js';
+import { renderQrCode } from './qrCode.js';
 import type { PrinterState } from './PrinterState.js';
 import type { JobMeta, ReceiptLine, ReceiptSegment, TextSpan, VirtualReceipt } from './types.js';
 
@@ -75,11 +76,18 @@ export class ReceiptModel {
       case 'rasterImage':
         this.appendImage(cmd.widthBytes, cmd.heightDots, cmd.data, state);
         break;
+      case 'qrPrint':
+        this.appendQrCode(state);
+        break;
       case 'init':
       case 'bold':
       case 'underline':
       case 'align':
       case 'size':
+      case 'qrSelectModel':
+      case 'qrModuleSize':
+      case 'qrErrorCorrection':
+      case 'qrStoreData':
         // State-only commands: PrintJob already applied these to PrinterState.
         break;
       case 'unsupported':
@@ -147,6 +155,15 @@ export class ReceiptModel {
   private appendImage(widthBytes: number, heightDots: number, data: Buffer, state: PrinterState): void {
     this.lineOpen = false;
     const { pngDataUrl, widthPx, heightPx } = rasterToPngDataUrl(widthBytes, heightDots, data);
+    this.currentSegment().elements.push({ type: 'image', align: state.align, widthPx, heightPx, pngDataUrl });
+  }
+
+  private appendQrCode(state: PrinterState): void {
+    // A print with no prior store is malformed input — skip it rather than render garbage.
+    if (state.qrPendingData === null) return;
+
+    this.lineOpen = false;
+    const { pngDataUrl, widthPx, heightPx } = renderQrCode(state.qrPendingData, state.qrModuleSize, state.qrErrorCorrection);
     this.currentSegment().elements.push({ type: 'image', align: state.align, widthPx, heightPx, pngDataUrl });
   }
 }

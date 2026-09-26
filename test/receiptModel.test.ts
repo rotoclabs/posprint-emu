@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ReceiptModel } from '../src/receipt/ReceiptModel.js';
 import { defaultPrinterState, type PrinterState } from '../src/receipt/PrinterState.js';
-import type { ReceiptLine } from '../src/receipt/types.js';
+import type { ReceiptImage, ReceiptLine } from '../src/receipt/types.js';
 
 function text(s: string) {
   return { type: 'text' as const, bytes: Buffer.from(s, 'ascii') };
@@ -74,5 +74,25 @@ describe('ReceiptModel', () => {
 
     const wrapped = lines(model).map((l) => l.spans.map((s) => s.text).join(''));
     expect(wrapped).toEqual(['top', '', 'bottom']);
+  });
+
+  it('qrPrint with stored data renders a ReceiptImage', () => {
+    const model = new ReceiptModel(48);
+    model.applyCommand({ type: 'qrPrint' }, state({ qrPendingData: Buffer.from('order-1') }));
+
+    const images = model
+      .getSnapshot()
+      .segments.flatMap((s) => s.elements)
+      .filter((e): e is ReceiptImage => e.type === 'image');
+    expect(images).toHaveLength(1);
+    expect(images[0].pngDataUrl.startsWith('data:image/png;base64,')).toBe(true);
+  });
+
+  it('qrPrint with no prior store is skipped, not rendered', () => {
+    const model = new ReceiptModel(48);
+    model.applyCommand({ type: 'qrPrint' }, state());
+
+    const images = model.getSnapshot().segments.flatMap((s) => s.elements).filter((e) => e.type === 'image');
+    expect(images).toHaveLength(0);
   });
 });

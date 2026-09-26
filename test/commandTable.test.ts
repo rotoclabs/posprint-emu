@@ -3,6 +3,7 @@ import { boldSpec, underlineSpec, alignSpec, sizeSpec } from '../src/escpos/comm
 import { feedLinesSpec, feedDotsSpec, lineFeedSpec } from '../src/escpos/commands/feed.js';
 import { cutSpec } from '../src/escpos/commands/cut.js';
 import { rasterImageSpec } from '../src/escpos/commands/image.js';
+import { qr2dSpec } from '../src/escpos/commands/qrCode.js';
 import { initSpec } from '../src/escpos/commands/init.js';
 
 describe('command decoders', () => {
@@ -66,6 +67,58 @@ describe('command decoders', () => {
       widthBytes: 2,
       heightDots: 3,
       data: Buffer.from([0x11, 0x22, 0x33, 0x44, 0x55, 0x66]),
+    });
+  });
+
+  describe('QR code (GS ( k)', () => {
+    it('select model', () => {
+      const payload = Buffer.from([4, 0, 0x31, 0x41, 50, 0]);
+      expect(qr2dSpec.totalLength(payload.subarray(0, 2))).toBe(4);
+      expect(qr2dSpec.decode(payload)).toEqual({ type: 'qrSelectModel', model: 50 });
+    });
+
+    it('set module size', () => {
+      const payload = Buffer.from([3, 0, 0x31, 0x43, 5]);
+      expect(qr2dSpec.decode(payload)).toEqual({ type: 'qrModuleSize', size: 5 });
+    });
+
+    it('set error correction level maps 48-51 to L/M/Q/H', () => {
+      expect(qr2dSpec.decode(Buffer.from([3, 0, 0x31, 0x45, 0x30]))).toEqual({
+        type: 'qrErrorCorrection',
+        level: 'L',
+      });
+      expect(qr2dSpec.decode(Buffer.from([3, 0, 0x31, 0x45, 0x31]))).toEqual({
+        type: 'qrErrorCorrection',
+        level: 'M',
+      });
+      expect(qr2dSpec.decode(Buffer.from([3, 0, 0x31, 0x45, 0x32]))).toEqual({
+        type: 'qrErrorCorrection',
+        level: 'Q',
+      });
+      expect(qr2dSpec.decode(Buffer.from([3, 0, 0x31, 0x45, 0x33]))).toEqual({
+        type: 'qrErrorCorrection',
+        level: 'H',
+      });
+    });
+
+    it('store data slices off cn/fn/m and keeps the rest', () => {
+      const data = Buffer.from('HELLO');
+      const payload = Buffer.concat([Buffer.from([data.length + 3, 0, 0x31, 0x50, 0x30]), data]);
+      expect(qr2dSpec.totalLength(payload.subarray(0, 2))).toBe(data.length + 3);
+      expect(qr2dSpec.decode(payload)).toEqual({ type: 'qrStoreData', data });
+    });
+
+    it('print stored symbol', () => {
+      const payload = Buffer.from([3, 0, 0x31, 0x51, 0x30]);
+      expect(qr2dSpec.decode(payload)).toEqual({ type: 'qrPrint' });
+    });
+
+    it('unrecognized cn/fn decode as unsupported, not a crash', () => {
+      const wrongCn = Buffer.from([2, 0, 0x30, 0x41]);
+      expect(qr2dSpec.decode(wrongCn)).toEqual({ type: 'unsupported', name: 'qr2d:cn48', bytes: wrongCn });
+
+      const wrongFn = Buffer.from([2, 0, 0x31, 0x52]);
+      expect(qr2dSpec.decode(wrongFn)).toEqual({ type: 'unsupported', name: 'qr2d:fn82', bytes: wrongFn });
     });
   });
 });
