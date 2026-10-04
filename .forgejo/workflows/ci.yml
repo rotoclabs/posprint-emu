@@ -1,0 +1,22 @@
+# posprint-emu's own pipeline: lint, test, build on every push. It is a standalone project (reused by
+# ssp-cafetops, which pulls it in as a submodule for its printer integration tests), so it is checked
+# here on its own, whatever consumes it. Runs on the Forgejo runner's `host` label; the file moves to
+# .github/workflows unchanged if this ever runs on GitHub (only `runs-on` would change).
+name: ci
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: host
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install (exact lockfile versions)
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
